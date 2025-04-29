@@ -7,6 +7,10 @@ import json
 from mfgdata import extractmfgresults, extracttop5questions, askwithpdf, rootcauseanalysis, supplychainassistant, productionplanning
 import datetime
 
+# from login import require_login
+
+# require_login()
+
 # Helper function to read text files
 def read_text_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
