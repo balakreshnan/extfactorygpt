@@ -1,0 +1,11 @@
+__pycache__/
+.vscode/
+local.settings.json
+.venv/
+.venv311/
+.env
+coding/
+output/
+.cache/
+browser_data/
+.scan*
