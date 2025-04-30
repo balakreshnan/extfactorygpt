@@ -104,14 +104,13 @@ def factorygpthome():
     
     tab1, tab2 = st.tabs(["Manufacturing GPT", "Source"])
     with tab1:
-        st.header("Manufacturing GPT - Compliance and Cybersecurity, OSHA Knowledge Agent")
-        
+        st.header("Manufacturing GPT")        
 
         print('Email: ', st.session_state.email)
         if st.session_state.email:
             user_indexes = get_user_indexes(st.session_state.email, MOCK_COMPANY_ID)
             if user_indexes:
-                selected_index = st.selectbox("Choose an Index", user_indexes)
+                selected_index = st.selectbox("Choose an Topic:", user_indexes)
                 st.success(f"You selected: {selected_index}")
                 # Display top 5 questions
                 with st.spinner("Loading top 5 questions..."):
@@ -124,20 +123,21 @@ def factorygpthome():
             with st.spinner("Processing..."):
                 # Call the extractproductinfo function
                 #st.write("Searching for the query: ", prompt)
-                st.chat_message("user").markdown(prompt, unsafe_allow_html=True)
-                st.session_state.chat_history.append({"role": "user", "message": prompt})
-                starttime = datetime.datetime.now()
-                rfttopics = extractmfgresults(prompt, selected_index)
-                endtime = datetime.datetime.now()
+                if user_indexes:
+                    st.chat_message("user").markdown(prompt, unsafe_allow_html=True)
+                    st.session_state.chat_history.append({"role": "user", "message": prompt})
+                    starttime = datetime.datetime.now()
+                    rfttopics = extractmfgresults(prompt, selected_index)
+                    endtime = datetime.datetime.now()
 
-                #st.markdown(f"Time taken to process: {endtime - starttime}", unsafe_allow_html=True)
-                rfttopics += f"\n Time taken to process: {endtime - starttime}"
-                st.session_state.chat_history.append({"role": "assistant", "message": rfttopics})
-                st.chat_message("assistant").markdown(rfttopics, unsafe_allow_html=True)
+                    #st.markdown(f"Time taken to process: {endtime - starttime}", unsafe_allow_html=True)
+                    rfttopics += f"\n Time taken to process: {endtime - starttime}"
+                    st.session_state.chat_history.append({"role": "assistant", "message": rfttopics})
+                    st.chat_message("assistant").markdown(rfttopics, unsafe_allow_html=True)
 
-                # Keep only the last 10 messages
-                if len(st.session_state.chat_history) > 20:  # 10 user + 10 assistant
-                    st.session_state.chat_history = st.session_state.chat_history[-20:]
+                    # Keep only the last 10 messages
+                    if len(st.session_state.chat_history) > 20:  # 10 user + 10 assistant
+                        st.session_state.chat_history = st.session_state.chat_history[-20:]
     with tab2:
         st.header("Upload your own source")
         uploaded_file = st.file_uploader("Upload a PDF or TXT file", type=["pdf", "txt"])

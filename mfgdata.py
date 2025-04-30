@@ -124,7 +124,7 @@ def processpdfwithprompt(query: str, search_index: str = "factorygpt"):
 
     return citationtxt
 
-def extractmfgresults(query: str, indexname: str = "factorygpt"):
+def extractmfgresults(query: str, indexname: str = "factorygpt") -> str:
     returntxt = ""
 
     rfttext = ""
@@ -162,16 +162,16 @@ def extractmfgresults(query: str, indexname: str = "factorygpt"):
     return returntxt
 
 @st.cache_data
-def extracttop5questions(selected_index):
+def extracttop5questions(selected_index: str) -> str:
     returntxt = ""
-    query = "Show me top 5 topics on Manufacturing Complaince, OSHA, CyberSecurity?"
+    query = "Show me top 5 topics on data source provided?"
 
     rfttext = ""
 
     citationtext = processpdfwithprompt(query, selected_index)
 
     message_text = [
-    {"role":"system", "content":f"""You are Manufacturing Complaince, OSHA, CyberSecurity AI agent. Be politely, and provide positive tone answers.
+    {"role":"system", "content":f"""You are AI agent. Be politely, and provide positive tone answers.
      Based on the question do a detail analysis on information and provide the best answers.
 
      Use the data source content provided to answer the question.
@@ -181,7 +181,7 @@ def extracttop5questions(selected_index):
      If not sure, ask the user to provide more information. Only respond with questions and no answers.
      Create a Markdown format for the questions.
     ."""}, 
-    {"role": "user", "content": f"""Show me top 5 questions on topics in the data set, make sure we cover all topics available in Manufacturing Complaince, OSHA, CyberSecurity, Personal Protection Equipment. Reply only the questions."""}]
+    {"role": "user", "content": f"""Show me top 5 questions on topics in the data source provided. Reply only the questions."""}]
 
     response = client.chat.completions.create(
         model=os.getenv("AZURE_OPENAI_DEPLOYMENT"), #"gpt-4-turbo", # model = "deployment_name".
