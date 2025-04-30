@@ -6,10 +6,25 @@ from PyPDF2 import PdfReader
 import json
 from mfgdata import extractmfgresults, extracttop5questions, askwithpdf, rootcauseanalysis, supplychainassistant, productionplanning
 import datetime
+from azure.cosmos import CosmosClient, exceptions
 
 # from login import require_login
 
 # require_login()
+
+# ----------------------
+# Cosmos DB Configuration
+# ----------------------
+COSMOS_ENDPOINT = os.getenv("COSMOS_ENDPOINT")
+COSMOS_KEY = os.getenv("COSMOS_KEY")
+DATABASE_NAME = os.getenv("DATABASE_NAME")
+CONTAINER_NAME = os.getenv("CONTAINER_NAME")
+
+# ----------------------
+# Utility Functions
+# ----------------------
+def get_cosmos_client():
+    return CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
 
 # Helper function to read text files
 def read_text_file(file_path):
@@ -35,6 +50,41 @@ def fetch_source_content(file_name):
         return read_pdf_file(file_path)
     return "Unsupported file format."
 
+# Fetch user's access record
+def get_user_indexes(email, company_id):
+
+    # Initialize Cosmos client
+    CONTAINER_NAME = "indexcol"
+    client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
+    database = client.get_database_client(DATABASE_NAME)
+    container = database.get_container_client(CONTAINER_NAME)
+
+    query = f"SELECT * FROM c WHERE c.email = '{email}'"
+    print('query: ', query)
+    items = list(container.query_items(query=query, enable_cross_partition_query=True))
+    
+    if not items:
+        return []
+
+    user_doc = items[0]
+    print("user doc", user_doc)
+    # if user_doc["role"] == "admin":
+    #     # For admins, get all unique indexes in this company (example logic)
+    #     index_query = f"""
+    #     SELECT DISTINCT VALUE idx FROM c
+    #     JOIN idx IN c.indexes
+    #     WHERE c.companyId = @companyId AND c.type = "userAccess"
+    #     """
+    #     idx_items = list(container.query_items(
+    #         query=index_query,
+    #         parameters=[{"name": "@companyId", "value": company_id}],
+    #         partition_key=company_id
+    #     ))
+    #     return sorted(set(idx_items))
+    # else:
+    #     return sorted(user_doc.get("indexes", []))
+    return sorted(user_doc.get("indexes", []))
+
 # Initialize chat history in session state
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
@@ -47,6 +97,8 @@ if "chat_history_pdf" not in st.session_state:
 if "uploaddata" not in st.session_state:
     st.session_state.uploaddata = None
 
+MOCK_COMPANY_ID = "companyA"
+
 # Streamlit App
 def factorygpthome():
     
@@ -57,6 +109,15 @@ def factorygpthome():
         with st.spinner("Loading top 5 questions..."):
             top5questions = extracttop5questions()
             st.markdown(top5questions, unsafe_allow_html=True)
+
+        print('Email: ', st.session_state.email)
+        if st.session_state.email:
+            user_indexes = get_user_indexes(st.session_state.email, MOCK_COMPANY_ID)
+            if user_indexes:
+                selected_index = st.selectbox("Choose an Index", user_indexes)
+                st.success(f"You selected: {selected_index}")
+            else:
+                st.warning("No indexes available or user not authorized.")
 
         if prompt := st.chat_input("what are the personal protection i should consider in manufacturing?", key="chat1"):
             with st.spinner("Processing..."):

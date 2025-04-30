@@ -64,6 +64,30 @@ def get_user(username):
     except Exception as e:
         st.error(f"Error accessing Cosmos DB: {e}")
         return None
+    
+def get_email(username):
+    try:
+        client = get_cosmos_client()
+        db = client.get_database_client(DATABASE_NAME)
+
+        # Check if database exists
+        db.read()  # raises CosmosResourceNotFoundError if it doesn't exist
+
+        container = db.get_container_client(CONTAINER_NAME)
+
+        # Check if container exists
+        container.read()
+
+        query = f"SELECT * FROM c WHERE c.username = '{username}'"
+        items = list(container.query_items(query=query, enable_cross_partition_query=True))
+        return items[0] if items else None
+
+    except exceptions.CosmosResourceNotFoundError as e:
+        st.error(f"Database or container not found: {e}")
+        return None
+    except Exception as e:
+        st.error(f"Error accessing Cosmos DB: {e}")
+        return None
 
 def create_user(username, password):
     if get_user(username):
@@ -98,6 +122,8 @@ if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 if "username" not in st.session_state:
     st.session_state.username = ""
+if "email" not in st.session_state:
+    st.session_state.email = ""
 
 # ----------------------
 # Login / Register Page
@@ -113,8 +139,11 @@ if not st.session_state.authenticated:
             if login(username, password):
                 st.session_state.authenticated = True
                 st.session_state.username = username
+                emailadd = get_email(username)['email']
+                st.session_state.email = emailadd
                 st.success("Login successful!")
                 # st.experimental_rerun()
+                print('Email:', emailadd)
                 # Sidebar navigation
                 nav_option = st.sidebar.selectbox("Navigation", ["Home", "FactoryGPT"
                                                                  , "Logout"
@@ -122,7 +151,9 @@ if not st.session_state.authenticated:
 
                 # Display the selected page
                 if nav_option == "FactoryGPT":
-                    factorygpthome()
+                    # factorygpthome()
+                    if st.session_state["authenticated"]:
+                        factorygpthome()
                 elif nav_option == "Logout":
                     st.session_state.authenticated = False
                     st.session_state.username = ""
