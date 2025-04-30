@@ -105,10 +105,7 @@ def factorygpthome():
     tab1, tab2 = st.tabs(["Manufacturing GPT", "Source"])
     with tab1:
         st.header("Manufacturing GPT - Compliance and Cybersecurity, OSHA Knowledge Agent")
-        # Display top 5 questions
-        with st.spinner("Loading top 5 questions..."):
-            top5questions = extracttop5questions()
-            st.markdown(top5questions, unsafe_allow_html=True)
+        
 
         print('Email: ', st.session_state.email)
         if st.session_state.email:
@@ -116,6 +113,10 @@ def factorygpthome():
             if user_indexes:
                 selected_index = st.selectbox("Choose an Index", user_indexes)
                 st.success(f"You selected: {selected_index}")
+                # Display top 5 questions
+                with st.spinner("Loading top 5 questions..."):
+                    top5questions = extracttop5questions(selected_index)
+                    st.markdown(top5questions, unsafe_allow_html=True)
             else:
                 st.warning("No indexes available or user not authorized.")
 
@@ -126,7 +127,7 @@ def factorygpthome():
                 st.chat_message("user").markdown(prompt, unsafe_allow_html=True)
                 st.session_state.chat_history.append({"role": "user", "message": prompt})
                 starttime = datetime.datetime.now()
-                rfttopics = extractmfgresults(prompt)
+                rfttopics = extractmfgresults(prompt, selected_index)
                 endtime = datetime.datetime.now()
 
                 #st.markdown(f"Time taken to process: {endtime - starttime}", unsafe_allow_html=True)

@@ -45,7 +45,7 @@ search_index=os.getenv("AZURE_AI_SEARCH_INDEX_MFG")
 citationtxt = ""
 print('Search Index:', search_index)
 
-def processpdfwithprompt(query: str):
+def processpdfwithprompt(query: str, search_index: str = "factorygpt"):
     returntxt = ""
     citationtxt = ""
     selected_optionsearch = "vector_semantic_hybrid"
@@ -124,12 +124,12 @@ def processpdfwithprompt(query: str):
 
     return citationtxt
 
-def extractmfgresults(query):
+def extractmfgresults(query: str, indexname: str = "factorygpt"):
     returntxt = ""
 
     rfttext = ""
 
-    citationtext = processpdfwithprompt(query)
+    citationtext = processpdfwithprompt(query, indexname)
 
     message_text = [
     {"role":"system", "content":f"""You are Manufacturing Complaince, OSHA, CyberSecurity AI agent. Be politely, and provide positive tone answers.
@@ -162,13 +162,13 @@ def extractmfgresults(query):
     return returntxt
 
 @st.cache_data
-def extracttop5questions():
+def extracttop5questions(selected_index):
     returntxt = ""
     query = "Show me top 5 topics on Manufacturing Complaince, OSHA, CyberSecurity?"
 
     rfttext = ""
 
-    citationtext = processpdfwithprompt(query)
+    citationtext = processpdfwithprompt(query, selected_index)
 
     message_text = [
     {"role":"system", "content":f"""You are Manufacturing Complaince, OSHA, CyberSecurity AI agent. Be politely, and provide positive tone answers.
