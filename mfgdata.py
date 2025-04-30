@@ -132,7 +132,7 @@ def extractmfgresults(query: str, indexname: str = "factorygpt") -> str:
     citationtext = processpdfwithprompt(query, indexname)
 
     message_text = [
-    {"role":"system", "content":f"""You are Manufacturing Complaince, OSHA, CyberSecurity AI agent. Be politely, and provide positive tone answers.
+    {"role":"system", "content":f"""You are AI agent. Be politely, and provide positive tone answers.
      Based on the question do a detail analysis on information and provide the best answers.
      Here is the Manufacturing content provided:
      {rfttext}
@@ -164,7 +164,13 @@ def extractmfgresults(query: str, indexname: str = "factorygpt") -> str:
 @st.cache_data
 def extracttop5questions(selected_index: str) -> str:
     returntxt = ""
-    query = "Show me top 5 topics on data source provided?"
+    query = ""
+    if selected_index == "factorygpt":
+        query = "Create 5 questions about Manufacturing Complaince about OSHA, PPE and CyberSecurity Nist 800 Complaince?"
+    elif selected_index == "constrfp":
+        query = "Create 5 questions about Railway and Bridge constructions?"
+    elif selected_index == "medjournals":
+        query = "Create 5 questions about COVID medical journals about the epidemics?"
 
     rfttext = ""
 

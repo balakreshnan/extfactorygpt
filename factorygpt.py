@@ -113,7 +113,7 @@ def factorygpthome():
                 selected_index = st.selectbox("Choose an Topic:", user_indexes)
                 st.success(f"You selected: {selected_index}")
                 # Display top 5 questions
-                with st.spinner("Loading top 5 questions..."):
+                with st.spinner("Loading top 5 questions for {selected_index} ......"):
                     top5questions = extracttop5questions(selected_index)
                     st.markdown(top5questions, unsafe_allow_html=True)
             else:
